@@ -8,7 +8,4 @@ require (
 	github.com/panjf2000/ants/v2 v2.4.6
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.9
-	models v0.0.1
 )
-
-replace models v0.0.1 => ./models

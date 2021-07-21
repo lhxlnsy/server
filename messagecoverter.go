@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	models "models"
+	models "github.com/lhxlnsy/server/models/meter_grid"
 
 	Redis "github.com/lhxlnsy/redis"
 )

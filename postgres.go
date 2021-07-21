@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 
-	models "models"
+	models "github.com/lhxlnsy/server/models/meter_grid"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

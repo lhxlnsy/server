@@ -33,7 +33,12 @@ func generatePostgreConnStr(option *postgreOption) string {
 
 var GormDb *gorm.DB
 
-func Init() {
+type PostgreServer interface {
+	Init() PostgreServer
+}
+
+func Init() *gorm.DB {
+
 	dsn := &postgreOption{
 		Host:     "192.168.0.222",
 		User:     "planetarkpower",
@@ -52,4 +57,5 @@ func Init() {
 	db.AutoMigrate(&models.Meter_grid_stat{})
 	db.Exec("CREATE EXTENSION IF NOT EXISTS timescaledb")
 	db.Exec("SELECT create_hypertable('meter_grid_stats', 'timestamp')")
+	return GormDb
 }

@@ -7,17 +7,16 @@ import (
 	"sync"
 	"time"
 
-	Redis "github.com/lhxlnsy/redis"
-
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/panjf2000/ants/v2"
+	"gorm.io/gorm"
 )
 
 var messagecount int
 var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Printf("received message: %s\n", msg)
 	messagecount++
-	ConvertMessageToStruct(redis, msg.Payload(), msg.Topic())
+	ConvertMessageToStruct(msg.Payload(), msg.Topic())
 }
 
 type Mqtt interface {
@@ -25,12 +24,15 @@ type Mqtt interface {
 	Subscribe()
 }
 
-var redis *Redis.PAPRedis
-
 type PAPMqtt struct {
-	mqtt   Mqtt
 	topic  string
 	client mqtt.Client
+}
+
+type PAPServer struct {
+	PAPMqtt         *PAPMqtt
+	PostgressServer *gorm.DB
+	Redis           *PAPRedis
 }
 
 func (m *PAPMqtt) Subcribe() {
@@ -40,10 +42,6 @@ func (m *PAPMqtt) Subcribe() {
 		panic(token.Error())
 	}
 	token.Wait()
-}
-
-func (m *PAPMqtt) SetRedis(redispopl *Redis.PAPRedis) {
-	redis = redispopl
 }
 
 func (m *PAPMqtt) Publish(args ...string) {
@@ -100,4 +98,21 @@ func NewMqtt(pool *ants.Pool, wg *sync.WaitGroup) *PAPMqtt {
 		topic:  "meter_grid/state",
 		client: client,
 	}
+}
+
+var papserver *PAPServer
+
+func GetPAPServer() *PAPServer {
+	return papserver
+}
+
+func StartPAPServer(pool *ants.Pool, wg *sync.WaitGroup) *PAPServer {
+	papmqtt := NewMqtt(pool, wg)
+	pappostgre := Init()
+	papserver := &PAPServer{
+		PAPMqtt:         papmqtt,
+		PostgressServer: pappostgre,
+		Redis:           Redis,
+	}
+	return papserver
 }
